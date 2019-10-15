@@ -7,7 +7,17 @@ class CPU:
 
     def __init__(self):
         """Construct a new CPU."""
-        pass
+        self.ram = [0] * 256
+        self.reg = [0] * 8
+        self.pc = 0
+
+    def ram_read(self,address):
+        MAR = address
+        return self.ram[address]
+
+    def ram_write(self,address,value):
+        MDR = value
+        self.ram[address] = value
 
     def load(self):
         """Load a program into memory."""
@@ -62,4 +72,31 @@ class CPU:
 
     def run(self):
         """Run the CPU."""
-        pass
+        IR  = self.pc
+        operand_a = self.ram_read(self.pc+1)
+        operand_b = self.ram_read(self.pc+2)
+
+        running = True
+        self.load()
+        # print(self.ram_read(0)) 
+        curr_addr = 0
+        
+        while running:
+            if self.ram_read(curr_addr) == 130 :
+                self.reg[self.ram_read(curr_addr+1)] = self.ram_read(curr_addr+2)
+                print(f'Register value {self.reg[self.ram_read(curr_addr+1)]}')
+                # print(f'Register value {self.reg[self.ram_read(curr_addr+4)]}')
+                curr_addr += 3
+            elif self.ram_read(curr_addr) == 71:
+                print(f'address is : {curr_addr}')
+                print(self.reg[self.ram_read(curr_addr+1)])
+                curr_addr += 2
+            elif self.ram_read(curr_addr) == 1:
+                print(f'hlt : {self.ram_read(curr_addr)}')
+                sys.exit(1)
+
+
+
+# cpu = CPU()
+
+# cpu.run()
