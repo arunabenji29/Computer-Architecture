@@ -10,6 +10,7 @@ class CPU:
         self.ram = [0] * 256
         self.reg = [0] * 8
         self.pc = 0
+        self.sp = 0b11110100
 
     def ram_read(self,address):
         MAR = address
@@ -105,16 +106,16 @@ class CPU:
         curr_addr = 0
 
         while running:
-
+            self.trace()
             if int(f'{self.ram_read(curr_addr)}',2) == 130 :
-                self.reg[self.ram_read(curr_addr+1)] = self.ram_read(curr_addr+2)
-                # print(f'Register value {self.reg[self.ram_read(curr_addr+1)]}')
+                self.reg[int(f'{self.ram_read(curr_addr+1)}',2)] = self.ram_read(curr_addr+2)
                 shift = int(f'{self.ram_read(curr_addr)}',2)
                 incr = shift >> 6
                 curr_addr += (incr + 1)
 
             elif int(f'{self.ram_read(curr_addr)}',2) == 71:
-                print(self.reg[self.ram_read(curr_addr+1)])
+                bina = self.reg[int(f'{self.ram_read(curr_addr+1)}',2)]
+                print(f"print value at register:R{int(f'{self.ram_read(curr_addr+1)}',2)},value: {int(f'{bina}',2)}")
                 shift = int(f'{self.ram_read(curr_addr)}',2)
                 incr = shift >> 6
                 curr_addr += (incr + 1)
@@ -126,11 +127,25 @@ class CPU:
                 incr = shift >> 6
                 curr_addr += (incr + 1)
 
+            elif int(f'{self.ram_read(curr_addr)}',2) == 69:
+                self.reg[7] = self.reg[self.ram_read(curr_addr+1)]
+                self.sp -= 1
+                self.ram_write(self.sp,self.reg[7])
+                
+                shift = int(f'{self.ram_read(curr_addr)}',2)
+                incr = shift >> 6
+                curr_addr += (incr + 1)
+
+            elif int(f'{self.ram_read(curr_addr)}',2) == 70:
+
+                self.reg[int(f'{self.ram_read(curr_addr+1)}',2)] = self.ram[self.sp]
+                self.sp += 1
+                shift = int(f'{self.ram_read(curr_addr)}',2)
+                incr = shift >> 6
+                curr_addr += (incr + 1)
+
             elif int(f'{self.ram_read(curr_addr)}',2) == 1:
                 sys.exit(1)
 
         
 
-# cpu = CPU()
-
-# cpu.run()
