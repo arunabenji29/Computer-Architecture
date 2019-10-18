@@ -1,4 +1,4 @@
-"""CPU functionality."""
+# """CPU functionality."""
 
 import sys
 
@@ -106,16 +106,17 @@ class CPU:
         curr_addr = 0
 
         while running:
-            self.trace()
+            # self.trace()
             if int(f'{self.ram_read(curr_addr)}',2) == 130 :
-                self.reg[int(f'{self.ram_read(curr_addr+1)}',2)] = self.ram_read(curr_addr+2)
+                self.reg[int(f'{self.ram_read(curr_addr+1)}',2)] = int(f'{self.ram_read(curr_addr+2)}',2)
+                # print(f"load: register{int(f'{self.ram_read(curr_addr+1)}',2)} value:{self.reg[int(f'{self.ram_read(curr_addr+1)}',2)]}")
                 shift = int(f'{self.ram_read(curr_addr)}',2)
                 incr = shift >> 6
                 curr_addr += (incr + 1)
 
             elif int(f'{self.ram_read(curr_addr)}',2) == 71:
                 bina = self.reg[int(f'{self.ram_read(curr_addr+1)}',2)]
-                print(f"print value at register:R{int(f'{self.ram_read(curr_addr+1)}',2)},value: {int(f'{bina}',2)}")
+                # print(f"print value at register:R{int(f'{self.ram_read(curr_addr+1)}',2)},value: {int(f'{bina}',2)}")
                 shift = int(f'{self.ram_read(curr_addr)}',2)
                 incr = shift >> 6
                 curr_addr += (incr + 1)
@@ -123,6 +124,13 @@ class CPU:
             elif int(f'{self.ram_read(curr_addr)}',2) == 162:
                 self.alu('MUL',self.ram_read(curr_addr+1),self.ram_read(curr_addr+2))
                 print(f"mul result: {self.reg[0]} conv to int: {int(f'{self.reg[0]}',2)}")
+                shift = int(f'{self.ram_read(curr_addr)}',2)
+                incr = shift >> 6
+                curr_addr += (incr + 1)
+
+            elif int(f'{self.ram_read(curr_addr)}',2) == 160:
+                self.alu('ADD',self.ram_read(curr_addr+1),self.ram_read(curr_addr+2))
+                print(f"add result: {self.reg[0]}")
                 shift = int(f'{self.ram_read(curr_addr)}',2)
                 incr = shift >> 6
                 curr_addr += (incr + 1)
@@ -147,5 +155,23 @@ class CPU:
             elif int(f'{self.ram_read(curr_addr)}',2) == 1:
                 sys.exit(1)
 
-        
+            elif int(f'{self.ram_read(curr_addr)}',2) == 80:
+                # Push the return address on the stack. 
+                # This allows us to return to where we left off when the subroutine finishes executing.
+                # The PC is set to the address stored in the given register. 
+                # We jump to that location in RAM and execute the first instruction in the subroutine. 
+                # The PC can move forward or backwards from its current location.
+                self.sp -= 1
+                # print(f'call: {self.sp}')
+                # print(f"pc value: {curr_addr+2}")
+                self.ram_write(self.sp,curr_addr+2)
+                # print(f"address: {self.reg[self.ram_read(curr_addr+1)]}")
 
+                curr_addr = self.reg[self.ram_read(curr_addr+1)]
+
+        
+            elif int(f'{self.ram_read(curr_addr)}',2) == 17:
+                # Pop the value from the top of the stack and store it in the PC.
+                curr_addr = self.ram_read(self.sp)
+                self.sp += 1
+                print(f'returned value: {curr_addr}')
